@@ -74,6 +74,16 @@ function showDefinition(popup, word, data) {
   const wordWithPhonetic = entry.word;
   const meanings = entry.meanings || [];
 
+  // 获取音频链接（优先找英式发音，其次美式）
+  let audioUrl = null;
+  if (entry.phonetics && entry.phonetics.length > 0) {
+    // 查找有音频的 phonetic
+    const withAudio = entry.phonetics.find(p => p.audio && p.audio !== '');
+    if (withAudio) {
+      audioUrl = withAudio.audio;
+    }
+  }
+
   // 构建定义 HTML
   let definitionsHtml = '';
 
@@ -96,14 +106,58 @@ function showDefinition(popup, word, data) {
     definitionsHtml += `</div>`;
   });
 
-  popup.innerHTML = `
+  // 构建标题栏（包含发音按钮）
+  const headerHtml = `
     <div class="dict-popup-header">
-      <h3 class="dict-popup-word">${wordWithPhonetic}</h3>
+      <div class="dict-popup-header-left">
+        <h3 class="dict-popup-word">${wordWithPhonetic}</h3>
+        ${audioUrl ? `<button class="dict-popup-audio" data-audio="${audioUrl}" title="播放发音">🔊</button>` : ''}
+      </div>
     </div>
+  `;
+
+  popup.innerHTML = `
+    ${headerHtml}
     <div class="dict-popup-content">
       ${definitionsHtml}
     </div>
   `;
+
+  // 绑定发音按钮事件
+  if (audioUrl) {
+    const audioBtn = popup.querySelector('.dict-popup-audio');
+    audioBtn.addEventListener('click', () => playAudio(audioUrl, audioBtn));
+  }
+}
+
+// 播放音频
+function playAudio(audioUrl, button) {
+  const audio = new Audio(audioUrl);
+
+  audio.addEventListener('play', () => {
+    button.textContent = '🔉';
+    button.classList.add('playing');
+  });
+
+  audio.addEventListener('ended', () => {
+    button.textContent = '🔊';
+    button.classList.remove('playing');
+  });
+
+  audio.addEventListener('error', () => {
+    button.textContent = '❌';
+    setTimeout(() => {
+      button.textContent = '🔊';
+    }, 1000);
+  });
+
+  audio.play().catch(err => {
+    console.error('播放失败:', err);
+    button.textContent = '❌';
+    setTimeout(() => {
+      button.textContent = '🔊';
+    }, 1000);
+  });
 }
 
 // 从 Free Dictionary API 获取定义

@@ -24,6 +24,15 @@
   padding: 14px 20px;
   border-radius: 16px 16px 0 0;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dict-popup-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .dict-popup-word {
@@ -32,6 +41,46 @@
   margin: 0;
   color: #ffffff;
   letter-spacing: 0.3px;
+}
+
+.dict-popup-audio {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.dict-popup-audio:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.1);
+}
+
+.dict-popup-audio:active {
+  transform: scale(0.95);
+}
+
+.dict-popup-audio.playing {
+  background: rgba(255, 255, 255, 0.4);
+  animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  to {
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+  }
 }
 
 .dict-popup-content {

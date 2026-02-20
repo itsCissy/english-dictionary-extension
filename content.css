@@ -1,0 +1,116 @@
+/* 划词词典弹窗样式 */
+
+.dict-popup {
+  position: fixed;
+  z-index: 999999;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  max-width: 380px;
+  min-width: 220px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  overflow: hidden;
+  animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dict-popup-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.dict-popup-word {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.dict-popup-content {
+  padding: 18px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.dict-popup-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dict-popup-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.dict-popup-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.dict-popup-content::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+.dict-popup-definition {
+  color: #2c3e50;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dict-popup-definition:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.dict-popup-part-of-speech {
+  color: #667eea;
+  font-style: italic;
+  font-weight: 600;
+  margin-right: 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dict-popup-example {
+  color: #6b7280;
+  font-size: 14px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-left: 3px solid #667eea;
+  border-radius: 0 6px 6px 0;
+  font-style: italic;
+}
+
+.dict-popup-loading {
+  padding: 24px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.dict-popup-error {
+  padding: 20px;
+  text-align: center;
+  color: #ef4444;
+  font-size: 15px;
+  background: #fef2f2;
+}
+
+.dict-popup phonetic {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  margin-left: 8px;
+}

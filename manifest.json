@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "English Dictionary",
+  "version": "1.0",
+  "description": "划词查看英英词典解释",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: white;
+  color: #1f2937;
+  padding: 30px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header h1 {
+  font-size: 24px;
+  margin-bottom: 16px;
+  color: #1f2937;
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+}
+
+.stat-item {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+/* Actions */
+.actions {
+  padding: 16px 20px;
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  color: #374151;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.btn-primary:hover {
+  background: #5a67d8;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+}
+
+/* Search */
+.search-box {
+  padding: 16px 20px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Word List */
+.word-list {
+  padding: 0 20px 20px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.word-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.word-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.word-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.word-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s ease;
+}
+
+.word-card:hover {
+  border-color: #667eea;
+}
+
+.word-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.word-card-word {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.word-card-date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.word-card-definition {
+  color: #4b5563;
+  line-height: 1.5;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.word-card-example {
+  color: #6b7280;
+  font-style: italic;
+  font-size: 13px;
+  padding-left: 12px;
+  border-left: 2px solid #e5e7eb;
+}
+
+.word-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.word-card-btn {
+  padding: 5px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  color: #374151;
+}
+
+.btn-master {
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.btn-master:hover {
+  background: #10b981;
+  color: white;
+}
+
+.btn-master.mastered {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.btn-delete {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.btn-delete:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+}
+
+.empty-state p {
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.empty-state .hint {
+  font-size: 13px;
+  color: #d1d5db;
+}

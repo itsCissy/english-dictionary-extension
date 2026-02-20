@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Dictionary - 生词本</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>📚 我的生词本</h1>
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-label">已保存</span>
+          <span class="stat-value" id="totalCount">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">已掌握</span>
+          <span class="stat-value" id="masteredCount">0</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="exportBtn">📤 导出</button>
+      <button class="btn btn-secondary" id="clearBtn">🗑️ 清空</button>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="搜索单词...">
+    </div>
+
+    <div class="word-list" id="wordList">
+      <div class="empty-state">
+        <p>还没有保存任何单词</p>
+        <p class="hint">在网页上选中单词，点击"保存"按钮即可添加</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

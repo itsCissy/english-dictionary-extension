@@ -1,14 +1,21 @@
 {
   "manifest_version": 3,
   "name": "English Dictionary",
-  "version": "1.0",
-  "description": "划词查看英英词典解释",
-  "permissions": ["activeTab"],
+  "version": "1.2",
+  "description": "划词查看英英词典解释，支持生词本功能",
+  "permissions": ["storage", "sidePanel"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"],
       "css": ["content.css"]
     }
-  ]
+  ],
+  "options_page": "options.html",
+  "action": {
+    "default_title": "English Dictionary - 生词本"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  }
 }

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Dictionary - 生词本</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <!-- 主视图 -->
+  <div id="mainView" class="view">
+    <div class="container">
+      <header class="header">
+        <h1>📚 生词本</h1>
+        <div class="stats" id="mainStats">
+          <div class="stat-item">
+            <span class="stat-value" id="totalCount">0</span>
+            <span class="stat-label">已保存</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="masteredCount">0</span>
+            <span class="stat-label">已掌握</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- 视图切换 -->
+      <div class="view-tabs">
+        <button class="tab-btn active" data-view="list">列表</button>
+        <button class="tab-btn" data-view="groups">分组</button>
+        <button class="tab-btn" data-view="review">复习</button>
+        <button class="tab-btn" data-view="stats">统计</button>
+      </div>
+
+      <!-- 列表视图 -->
+      <div id="listView" class="view-content active">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="搜索单词...">
+          <select id="tagFilter">
+            <option value="">全部标签</option>
+          </select>
+        </div>
+        <div class="date-filter">
+          <div class="date-filter-header">
+            <span>📅 按日期筛选</span>
+            <button class="date-clear" id="clearDateFilter" style="display: none;">清除</button>
+          </div>
+          <div class="calendar-toggle" id="calendarToggle">
+            <span id="selectedDateText">选择日期</span>
+            <span class="calendar-arrow">▼</span>
+          </div>
+          <div class="calendar-dropdown" id="calendarDropdown">
+            <div class="calendar-header">
+              <button class="calendar-nav" id="prevMonth">‹</button>
+              <span class="calendar-title" id="calendarTitle">2024年2月</span>
+              <button class="calendar-nav" id="nextMonth">›</button>
+            </div>
+            <div class="calendar-weekdays">
+              <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+            </div>
+            <div class="calendar-days" id="calendarDays">
+              <!-- 日期将在这里渲染 -->
+            </div>
+          </div>
+          <div class="date-stats" id="dateStats"></div>
+        </div>
+        <div class="word-list" id="wordList">
+          <div class="empty-state">
+            <p>还没有保存单词</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分组视图 -->
+      <div id="groupsView" class="view-content">
+        <div class="alphabet-list" id="alphabetList">
+          <!-- 字母分组将在这里渲染 -->
+        </div>
+      </div>
+
+      <!-- 复习视图 -->
+      <div id="reviewView" class="view-content">
+        <div id="flashcardContainer">
+          <div class="flashcard" id="flashcard">
+            <div class="flashcard-front" id="flashcardFront">
+              <div class="flashcard-word" id="reviewWord">Loading...</div>
+              <div class="flashcard-hint">点击翻转查看释义</div>
+            </div>
+            <div class="flashcard-back" id="flashcardBack">
+              <div class="flashcard-definition" id="reviewDefinition"></div>
+              <div class="flashcard-actions">
+                <button class="review-btn" data-result="hard">😓 难</button>
+                <button class="review-btn" data-result="good">😊 会</button>
+                <button class="review-btn" data-result="easy">😎 简单</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="review-progress">
+          <span id="reviewProgress">0 / 0</span>
+        </div>
+      </div>
+
+      <!-- 统计视图 -->
+      <div id="statsView" class="view-content">
+        <div class="stats-detail">
+          <div class="stat-card">
+            <div class="stat-card-label">总单词数</div>
+            <div class="stat-card-value" id="statTotal">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">已掌握</div>
+            <div class="stat-card-value" id="statMastered">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">学习率</div>
+            <div class="stat-card-value" id="statRate">0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">总查看次数</div>
+            <div class="stat-card-value" id="statViews">0</div>
+          </div>
+        </div>
+        <div class="most-viewed">
+          <h3>🔥 最常查看</h3>
+          <div id="mostViewedList"></div>
+        </div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="actions">
+        <button class="btn btn-primary" id="exportBtn" title="导出">📤</button>
+        <button class="btn btn-secondary" id="clearBtn" title="清空">🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 单词详情弹窗 -->
+  <div id="wordDetailModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="detailWord">Word</h2>
+        <button class="modal-close" id="closeModal">×</button>
+      </div>
+      <div class="modal-body" id="detailBody">
+        <!-- 单词详情内容 -->
+      </div>
+      <div class="modal-tags">
+        <label>标签：</label>
+        <div class="tag-input">
+          <input type="text" id="tagInput" placeholder="输入标签...">
+          <button id="addTagBtn">添加</button>
+        </div>
+        <div class="tag-list" id="detailTagList">
+          <!-- 标签列表 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

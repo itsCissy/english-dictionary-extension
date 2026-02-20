@@ -116,11 +116,22 @@ function showDefinition(popup, word, data) {
     </div>
   `;
 
+  // 构建底部操作栏
+  const footerHtml = `
+    <div class="dict-popup-footer">
+      <button class="dict-popup-save" id="saveBtn" title="保存到生词本">
+        <span class="icon">📚</span>
+        <span class="text">保存</span>
+      </button>
+    </div>
+  `;
+
   popup.innerHTML = `
     ${headerHtml}
     <div class="dict-popup-content">
       ${definitionsHtml}
     </div>
+    ${footerHtml}
   `;
 
   // 绑定发音按钮事件
@@ -128,6 +139,69 @@ function showDefinition(popup, word, data) {
     const audioBtn = popup.querySelector('.dict-popup-audio');
     audioBtn.addEventListener('click', () => playAudio(audioUrl, audioBtn));
   }
+
+  // 绑定保存按钮事件
+  const saveBtn = popup.querySelector('#saveBtn');
+  saveBtn.addEventListener('click', () => saveToWordBook(entry, saveBtn));
+}
+
+// 保存到生词本
+async function saveToWordBook(entry, button) {
+  const word = entry.word.toLowerCase();
+
+  // 检查是否已保存
+  const result = await chrome.storage.local.get('wordBook');
+  const wordBook = result.wordBook || {};
+
+  if (wordBook[word]) {
+    // 已保存，增加查看次数
+    wordBook[word].viewCount = (wordBook[word].viewCount || 0) + 1;
+    wordBook[word].lastViewedAt = new Date().toISOString();
+    await chrome.storage.local.set({ wordBook });
+
+    // 显示提示
+    button.querySelector('.text').textContent = '已保存';
+    button.classList.add('saved');
+    setTimeout(() => {
+      button.querySelector('.text').textContent = '保存';
+      button.classList.remove('saved');
+    }, 1500);
+    return;
+  }
+
+  // 准备保存的数据
+  const wordData = {
+    word: entry.word,
+    phonetic: entry.phonetic || '',
+    meanings: entry.meanings.map(m => ({
+      partOfSpeech: m.partOfSpeech,
+      definitions: m.definitions.slice(0, 3).map(d => ({
+        definition: d.definition,
+        example: d.example || ''
+      }))
+    })),
+    savedAt: new Date().toISOString(),
+    viewCount: 1,
+    lastViewedAt: new Date().toISOString(),
+    reviewCount: 0,
+    tags: [] // 标签列表
+  };
+
+  // 保存
+  wordBook[word] = wordData;
+  await chrome.storage.local.set({ wordBook });
+
+  // 更新按钮状态
+  button.querySelector('.icon').textContent = '✓';
+  button.querySelector('.text').textContent = '已保存';
+  button.classList.add('saved');
+
+  // 2秒后恢复
+  setTimeout(() => {
+    button.querySelector('.icon').textContent = '📚';
+    button.querySelector('.text').textContent = '保存';
+    button.classList.remove('saved');
+  }, 2000);
 }
 
 // 播放音频

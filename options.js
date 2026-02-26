@@ -1,3 +1,5 @@
+// Chrome/Firefox compatible
+const chromeOrBrowser = typeof browser !== "undefined" ? browser : chrome;
 // options.js - 生词本页面逻辑
 
 let wordBook = {};
@@ -11,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // 加载生词本数据
 async function loadWordBook() {
-  const result = await chrome.storage.local.get('wordBook');
+  const result = await chromeOrBrowser.storage.local.get('wordBook');
   wordBook = result.wordBook || {};
   updateStats();
 }
@@ -111,7 +113,7 @@ function bindCardEvents() {
 // 切换掌握状态
 async function toggleMastered(word) {
   wordBook[word].mastered = !wordBook[word].mastered;
-  await chrome.storage.local.set({ wordBook });
+  await chromeOrBrowser.storage.local.set({ wordBook });
   await loadWordBook();
   renderWordList(document.getElementById('searchInput').value);
 }
@@ -121,7 +123,7 @@ async function deleteWord(word) {
   if (!confirm(`确定要删除 "${word}" 吗？`)) return;
 
   delete wordBook[word];
-  await chrome.storage.local.set({ wordBook });
+  await chromeOrBrowser.storage.local.set({ wordBook });
   await loadWordBook();
   renderWordList(document.getElementById('searchInput').value);
 }
@@ -146,7 +148,7 @@ function setupEventListeners() {
     if (!confirm('确定要清空所有单词吗？此操作不可恢复！')) return;
 
     wordBook = {};
-    await chrome.storage.local.set({ wordBook });
+    await chromeOrBrowser.storage.local.set({ wordBook });
     await loadWordBook();
     renderWordList();
   });

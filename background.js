@@ -1,4 +1,8 @@
 // background.js - Service Worker for keyboard shortcuts
+// Chrome/Firefox compatible
+
+// 使用 browser 命名空间（Firefox 标准，Chrome 也支持）
+const chromeOrBrowser = typeof browser !== 'undefined' ? browser : chrome;
 
 // 插件启用状态
 let isPopupEnabled = true;
@@ -6,10 +10,17 @@ let isPopupEnabled = true;
 // 侧边栏状态
 let isSidePanelOpen = false;
 
+// 检测浏览器类型和 API 可用性
+const isFirefox = typeof browser !== 'undefined';
+const hasSidePanel = !!chromeOrBrowser.sidePanel;
+
+console.log('📚 Browser:', isFirefox ? 'Firefox' : 'Chrome');
+console.log('📚 SidePanel API:', hasSidePanel ? 'Supported' : 'Not supported');
+
 // 安装时初始化
-chrome.runtime.onInstalled.addListener(() => {
+chromeOrBrowser.runtime.onInstalled.addListener(() => {
   // 从存储中读取启用状态
-  chrome.storage.sync.get(['popupEnabled'], (result) => {
+  chromeOrBrowser.storage.sync.get(['popupEnabled'], (result) => {
     isPopupEnabled = result.popupEnabled !== false; // 默认启用
   });
 
@@ -17,7 +28,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // 处理快捷键命令
-chrome.commands.onCommand.addListener((command) => {
+chromeOrBrowser.commands.onCommand.addListener((command) => {
   switch (command) {
     case 'open-sidepanel':
       handleOpenSidePanel();
@@ -31,14 +42,19 @@ chrome.commands.onCommand.addListener((command) => {
 // 打开/关闭侧边栏
 async function handleOpenSidePanel() {
   try {
-    // 打开侧边栏
-    await chrome.sidePanel.open();
-    isSidePanelOpen = true;
+    if (hasSidePanel) {
+      // Chrome: 使用 Side Panel API
+      await chromeOrBrowser.sidePanel.open();
+      isSidePanelOpen = true;
+    } else {
+      // Firefox: 打开 options 页面作为替代
+      await chromeOrBrowser.runtime.openOptionsPage();
+    }
 
     // 通知当前标签页
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const [tab] = await chromeOrBrowser.tabs.query({ active: true, currentWindow: true });
     if (tab) {
-      chrome.tabs.sendMessage(tab.id, {
+      chromeOrBrowser.tabs.sendMessage(tab.id, {
         type: 'sidePanelToggled',
         open: true
       }).catch(() => {
@@ -55,12 +71,12 @@ async function handleTogglePopup() {
   isPopupEnabled = !isPopupEnabled;
 
   // 保存到存储
-  await chrome.storage.sync.set({ popupEnabled: isPopupEnabled });
+  await chromeOrBrowser.storage.sync.set({ popupEnabled: isPopupEnabled });
 
   // 通知所有标签页
-  const tabs = await chrome.tabs.query({});
+  const tabs = await chromeOrBrowser.tabs.query({});
   tabs.forEach(tab => {
-    chrome.tabs.sendMessage(tab.id, {
+    chromeOrBrowser.tabs.sendMessage(tab.id, {
       type: 'popupToggle',
       enabled: isPopupEnabled
     }).catch(() => {
@@ -77,11 +93,11 @@ function showNotification(enabled) {
   const title = 'English Dictionary';
   const message = enabled ? '🟢 划词查词已启用' : '🔴 划词查词已禁用';
 
-  // 尝试使用 chrome.notifications API
-  if (chrome.notifications) {
-    chrome.notifications.create({
+  // 尝试使用 notifications API
+  if (chromeOrBrowser.notifications) {
+    chromeOrBrowser.notifications.create({
       type: 'basic',
-      iconUrl: 'icon.png', // 可选：添加图标文件
+      iconUrl: 'icon.png',
       title: title,
       message: message
     });
@@ -89,7 +105,7 @@ function showNotification(enabled) {
 }
 
 // 监听侧边栏关闭事件
-chrome.runtime.onConnect.addListener((port) => {
+chromeOrBrowser.runtime.onConnect.addListener((port) => {
   if (port.name === 'sidepanel') {
     port.onDisconnect.addListener(() => {
       isSidePanelOpen = false;
@@ -98,11 +114,14 @@ chrome.runtime.onConnect.addListener((port) => {
 });
 
 // 监听来自 content script 的消息
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chromeOrBrowser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'getPopupState') {
     sendResponse({ enabled: isPopupEnabled });
   } else if (request.type === 'getSidePanelState') {
     sendResponse({ open: isSidePanelOpen });
+  } else if (request.type === 'openOptionsPage') {
+    // Firefox: 打开选项页面的备用方法
+    chromeOrBrowser.runtime.openOptionsPage().catch(console.error);
   }
   return true; // 保持消息通道开放
 });

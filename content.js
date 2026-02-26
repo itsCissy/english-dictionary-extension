@@ -1,18 +1,22 @@
 // content.js - 划词词典插件
+// Chrome/Firefox compatible
+
+// 使用 browser 命名空间（Firefox 标准，Chrome 也支持）
+const chromeOrBrowser = typeof browser !== 'undefined' ? browser : chrome;
 
 let currentPopup = null;
 let isProcessing = false;
 let isPopupEnabled = true;
 
 // 从 background 获取初始状态
-chrome.runtime.sendMessage({ type: 'getPopupState' }, (response) => {
+chromeOrBrowser.runtime.sendMessage({ type: 'getPopupState' }, (response) => {
   if (response) {
     isPopupEnabled = response.enabled;
   }
 });
 
 // 监听来自 background 的消息
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chromeOrBrowser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === 'popupToggle') {
     isPopupEnabled = request.enabled;
     // 如果禁用，关闭当前弹窗

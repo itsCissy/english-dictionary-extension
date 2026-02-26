@@ -1,3 +1,5 @@
+// Chrome/Firefox compatible
+const chromeOrBrowser = typeof browser !== "undefined" ? browser : chrome;
 // sidepanel.js - 侧边栏生词本逻辑
 
 let wordBook = {};
@@ -20,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // 加载生词本数据
 async function loadWordBook() {
-  const result = await chrome.storage.local.get('wordBook');
+  const result = await chromeOrBrowser.storage.local.get('wordBook');
   wordBook = result.wordBook || {};
 }
 
@@ -130,7 +132,7 @@ function setupEventListeners() {
     if (Object.keys(wordBook).length === 0) return;
     if (!confirm('清空所有单词？')) return;
     wordBook = {};
-    await chrome.storage.local.set({ wordBook });
+    await chromeOrBrowser.storage.local.set({ wordBook });
     await loadWordBook();
     updateStats();
     renderWordList();
@@ -378,7 +380,7 @@ function handleReviewResult(result) {
 
   // 保存
   wordBook[word] = data;
-  chrome.storage.local.set({ wordBook });
+  chromeOrBrowser.storage.local.set({ wordBook });
 
   // 下一张
   currentReviewIndex++;
@@ -449,7 +451,7 @@ function addTag() {
   if (!data.tags.includes(tag)) {
     data.tags.push(tag);
     wordBook[currentWordDetail] = data;
-    chrome.storage.local.set({ wordBook });
+    chromeOrBrowser.storage.local.set({ wordBook });
     renderDetailTags(data.tags);
     updateTagFilter();
   }
@@ -466,7 +468,7 @@ function removeTag(tag) {
 
   data.tags = data.tags.filter(t => t !== tag);
   wordBook[currentWordDetail] = data;
-  chrome.storage.local.set({ wordBook });
+  chromeOrBrowser.storage.local.set({ wordBook });
   renderDetailTags(data.tags);
   updateTagFilter();
 }
@@ -474,7 +476,7 @@ function removeTag(tag) {
 // 切换掌握状态
 async function toggleMastered(word) {
   wordBook[word].mastered = !wordBook[word].mastered;
-  await chrome.storage.local.set({ wordBook });
+  await chromeOrBrowser.storage.local.set({ wordBook });
   updateStats();
   showWordDetail(word); // 刷新详情
   renderWordList(); // 刷新列表
@@ -485,7 +487,7 @@ async function deleteWord(word) {
   if (!confirm(`删除 "${word}"？`)) return;
 
   delete wordBook[word];
-  await chrome.storage.local.set({ wordBook });
+  await chromeOrBrowser.storage.local.set({ wordBook });
 
   closeModal();
   updateStats();

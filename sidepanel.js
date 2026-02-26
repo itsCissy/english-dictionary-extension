@@ -10,8 +10,33 @@ let currentWordDetail = null;
 let selectedDate = null;
 let currentCalendarDate = new Date();
 
+// Firebase 云端同步
+let firestoreSync = null;
+let isFirebaseEnabled = false;
+let autoSyncEnabled = true;
+let syncUnsubscribe = null;
+
+// 检查 Firebase 是否已配置
+isFirebaseEnabled = typeof firebaseConfig !== 'undefined' &&
+                    firebaseConfig.apiKey !== 'YOUR_API_KEY';
+
 // 初始化
 document.addEventListener('DOMContentLoaded', async () => {
+  // 初始化 Firebase（如果已配置）
+  if (isFirebaseEnabled) {
+    try {
+      firestoreSync = new FirestoreSync();
+      await firestoreSync.init();
+      setupFirebaseListeners();
+    } catch (error) {
+      console.error('Firebase init failed:', error);
+      isFirebaseEnabled = false;
+    }
+  }
+
+  // 检查登录状态，显示对应界面
+  checkAuthState();
+
   await loadWordBook();
   setupEventListeners();
   updateStats();
@@ -160,6 +185,62 @@ function setupEventListeners() {
   document.getElementById('flashcard')?.addEventListener('click', function() {
     this.classList.toggle('flipped');
   });
+
+  // Firebase 登录/注册事件（如果已启用）
+  if (isFirebaseEnabled) {
+    // 登录表单
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      handleLogin(email, password);
+    });
+
+    // 注册表单
+    document.getElementById('registerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        showRegisterError('两次输入的密码不一致');
+        return;
+      }
+
+      handleRegister(email, password);
+    });
+
+    // 切换登录/注册
+    let isLoginForm = true;
+    document.getElementById('authSwitchBtn').addEventListener('click', () => {
+      isLoginForm = !isLoginForm;
+      document.getElementById('loginForm').style.display = isLoginForm ? 'block' : 'none';
+      document.getElementById('registerForm').style.display = isLoginForm ? 'none' : 'block';
+      document.getElementById('authSwitchText').textContent = isLoginForm ? '还没有账号？' : '已有账号？';
+      document.getElementById('authSwitchBtn').textContent = isLoginForm ? '注册' : '登录';
+      hideLoginError();
+      hideRegisterError();
+    });
+
+    // 同步按钮
+    document.getElementById('syncBtn').addEventListener('click', performSync);
+
+    // 账户按钮
+    document.getElementById('accountBtn').addEventListener('click', openAccountModal);
+
+    // 关闭账户弹窗
+    document.getElementById('closeAccountModal').addEventListener('click', closeAccountModal);
+
+    // 登出按钮
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+    // 了解更多链接
+    document.getElementById('learnMoreLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      chromeOrBrowser.runtime.openOptionsPage();
+    });
+  }
 }
 
 // 切换视图
@@ -632,4 +713,258 @@ function selectDate(dateStr) {
   // 重新渲染列表
   renderCalendar();
   renderWordList();
+}
+
+// ========================================
+// Firebase 云端同步功能
+// ========================================
+
+// 检查登录状态并显示对应界面
+function checkAuthState() {
+  if (!isFirebaseEnabled || !firestoreSync) {
+    // Firebase 未配置，显示主界面
+    showMainView();
+    updateSyncStatus('local');
+    return;
+  }
+
+  const user = firestoreSync.getCurrentUser();
+  if (user) {
+    showMainView();
+    updateSyncStatus('logged-in');
+    // 自动同步
+    if (autoSyncEnabled) {
+      performSync();
+    }
+  } else {
+    showLoginView();
+    updateSyncStatus('logged-out');
+  }
+}
+
+// 显示登录界面
+function showLoginView() {
+  document.getElementById('loginView').style.display = 'block';
+  document.getElementById('mainView').style.display = 'none';
+}
+
+// 显示主界面
+function showMainView() {
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('mainView').style.display = 'block';
+}
+
+// 设置 Firebase 事件监听
+function setupFirebaseListeners() {
+  if (!firestoreSync) return;
+
+  // 监听认证状态变化
+  firestoreSync.addListener((event, data) => {
+    switch (event) {
+      case 'authStateChanged':
+        if (data) {
+          showMainView();
+          updateSyncStatus('logged-in');
+          document.getElementById('accountEmail').textContent = data.email;
+          performSync();
+        } else {
+          showLoginView();
+          updateSyncStatus('logged-out');
+        }
+        break;
+      case 'syncComplete':
+        wordBook = data;
+        saveToLocalStorage();
+        updateStats();
+        renderWordList();
+        updateTagFilter();
+        hideSyncBanner();
+        updateSyncStatus('synced');
+        break;
+    }
+  });
+
+  // 监听云端数据实时变化
+  if (firestoreSync.isLoggedIn()) {
+    syncUnsubscribe = firestoreSync.onWordsChanged((cloudWords) => {
+      // 合并云端数据到本地
+      Object.entries(cloudWords).forEach(([word, data]) => {
+        if (!wordBook[word] || new Date(data.savedAt) > new Date(wordBook[word].savedAt || 0)) {
+          wordBook[word] = data;
+        }
+      });
+      saveToLocalStorage();
+      updateStats();
+      renderWordList();
+    });
+  }
+}
+
+// 登录处理
+async function handleLogin(email, password) {
+  if (!firestoreSync) return;
+
+  const result = await firestoreSync.login(email, password);
+  if (result.success) {
+    hideLoginError();
+  } else {
+    showLoginError(result.error);
+  }
+}
+
+// 注册处理
+async function handleRegister(email, password) {
+  if (!firestoreSync) return;
+
+  const result = await firestoreSync.register(email, password);
+  if (result.success) {
+    hideLoginError();
+  } else {
+    showRegisterError(result.error);
+  }
+}
+
+// 登出处理
+async function handleLogout() {
+  if (!firestoreSync) return;
+
+  await firestoreSync.logout();
+  if (syncUnsubscribe) {
+    syncUnsubscribe();
+    syncUnsubscribe = null;
+  }
+  closeAccountModal();
+  showLoginView();
+}
+
+// 执行同步
+async function performSync() {
+  if (!firestoreSync || !firestoreSync.isLoggedIn()) return;
+
+  showSyncBanner();
+  updateSyncStatus('syncing');
+
+  try {
+    // 先上传本地数据
+    await firestoreSync.uploadWords(wordBook);
+    // 然后下载并合并
+    const mergedWords = await firestoreSync.syncWords(wordBook);
+    wordBook = mergedWords;
+    saveToLocalStorage();
+    updateStats();
+    renderWordList();
+    hideSyncBanner();
+    updateSyncStatus('synced');
+  } catch (error) {
+    console.error('Sync failed:', error);
+    hideSyncBanner();
+    updateSyncStatus('error');
+  }
+}
+
+// 保存到本地存储
+async function saveToLocalStorage() {
+  await chromeOrBrowser.storage.local.set({ wordBook });
+}
+
+// 更新同步状态显示
+function updateSyncStatus(status) {
+  const syncStatus = document.getElementById('syncStatus');
+  const syncIcon = document.getElementById('syncIcon');
+  const syncText = document.getElementById('syncText');
+  const syncBtn = document.getElementById('syncBtn');
+
+  syncStatus.className = 'sync-status';
+
+  switch (status) {
+    case 'local':
+      syncIcon.textContent = '💾';
+      syncText.textContent = '本地';
+      syncBtn.style.display = 'none';
+      break;
+    case 'logged-out':
+      syncIcon.textContent = '☁️';
+      syncText.textContent = '未登录';
+      syncBtn.style.display = 'none';
+      break;
+    case 'logged-in':
+      syncIcon.textContent = '☁️';
+      syncText.textContent = '已登录';
+      syncBtn.style.display = 'inline-block';
+      break;
+    case 'syncing':
+      syncStatus.classList.add('syncing');
+      syncIcon.textContent = '🔄';
+      syncText.textContent = '同步中...';
+      break;
+    case 'synced':
+      syncStatus.classList.add('synced');
+      syncIcon.textContent = '✓';
+      syncText.textContent = '已同步';
+      syncBtn.style.display = 'inline-block';
+      break;
+    case 'error':
+      syncStatus.classList.add('error');
+      syncIcon.textContent = '⚠️';
+      syncText.textContent = '同步失败';
+      syncBtn.style.display = 'inline-block';
+      break;
+  }
+}
+
+// 显示/隐藏同步横幅
+function showSyncBanner() {
+  document.getElementById('syncBanner').style.display = 'flex';
+}
+
+function hideSyncBanner() {
+  document.getElementById('syncBanner').style.display = 'none';
+}
+
+// 显示登录错误
+function showLoginError(message) {
+  const errorDiv = document.getElementById('loginError');
+  errorDiv.textContent = message;
+}
+
+function hideLoginError() {
+  document.getElementById('loginError').textContent = '';
+}
+
+// 显示注册错误
+function showRegisterError(message) {
+  const errorDiv = document.getElementById('registerError');
+  errorDiv.textContent = message;
+}
+
+function hideRegisterError() {
+  document.getElementById('registerError').textContent = '';
+}
+
+// 账户弹窗
+function openAccountModal() {
+  document.getElementById('accountModal').classList.add('active');
+  if (firestoreSync) {
+    const user = firestoreSync.getCurrentUser();
+    if (user) {
+      document.getElementById('accountEmail').textContent = user.email;
+    }
+  }
+}
+
+function closeAccountModal() {
+  document.getElementById('accountModal').classList.remove('active');
+}
+
+// 在保存单词后触发同步
+async function syncAfterSave() {
+  if (isFirebaseEnabled && firestoreSync && firestoreSync.isLoggedIn() && autoSyncEnabled) {
+    try {
+      await firestoreSync.uploadWords(wordBook);
+      updateSyncStatus('synced');
+    } catch (error) {
+      console.error('Auto-sync failed:', error);
+      updateSyncStatus('error');
+    }
+  }
 }

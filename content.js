@@ -2,6 +2,28 @@
 
 let currentPopup = null;
 let isProcessing = false;
+let isPopupEnabled = true;
+
+// 从 background 获取初始状态
+chrome.runtime.sendMessage({ type: 'getPopupState' }, (response) => {
+  if (response) {
+    isPopupEnabled = response.enabled;
+  }
+});
+
+// 监听来自 background 的消息
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'popupToggle') {
+    isPopupEnabled = request.enabled;
+    // 如果禁用，关闭当前弹窗
+    if (!isPopupEnabled) {
+      closePopup();
+    }
+  } else if (request.type === 'sidePanelToggled') {
+    // 侧边栏状态变化（可用于未来功能）
+    console.log('Side panel toggled:', request.open);
+  }
+});
 
 // 防抖函数 - 避免快速选词时频繁请求
 function debounce(func, wait) {
@@ -278,6 +300,11 @@ function positionPopup(popup, x, y) {
 
 // 处理文本选择
 async function handleTextSelection() {
+  // 检查是否启用
+  if (!isPopupEnabled) {
+    return;
+  }
+
   const selectedText = getSelectedText();
 
   // 如果没有选中文本，关闭弹窗

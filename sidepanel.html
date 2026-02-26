@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>English Dictionary - 生词本</title>
   <link rel="stylesheet" href="sidepanel.css">
-  <!-- Firebase 配置 -->
-  <script src="firebase-config.js"></script>
 </head>
 <body>
   <!-- 登录视图 -->
@@ -248,8 +246,18 @@
     </div>
   </div>
 
-  <!-- Firebase SDK 和同步模块 -->
+  <!-- Firebase SDK (compat version for browser extensions) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase 配置 -->
+  <script src="firebase-config.js"></script>
+
+  <!-- Firebase 同步模块 -->
   <script src="firestore-sync.js"></script>
+
+  <!-- 主逻辑 -->
   <script src="sidepanel.js"></script>
 </body>
 </html>

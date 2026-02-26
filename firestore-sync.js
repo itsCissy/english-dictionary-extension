@@ -1,5 +1,5 @@
 // firestore-sync.js - Firebase 云端同步模块
-// 依赖：需要先加载 Firebase SDK 和 firebase-config.js
+// 依赖：firebase SDK (在 HTML 中加载) 和 firebase-config.js
 
 class FirestoreSync {
   constructor() {
@@ -16,11 +16,20 @@ class FirestoreSync {
     if (this.isInitialized) return;
 
     try {
-      // 动态加载 Firebase SDK（从 CDN）
-      await this.loadFirebaseSDK();
+      // 检查 Firebase SDK 是否已加载
+      if (typeof firebase === 'undefined') {
+        throw new Error('Firebase SDK not loaded');
+      }
 
-      // 初始化 Firebase
-      firebase.initializeApp(firebaseConfig);
+      // 检查配置是否存在
+      if (typeof firebaseConfig === 'undefined') {
+        throw new Error('Firebase config not found');
+      }
+
+      // 初始化 Firebase（如果还没有初始化）
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
 
       this.auth = firebase.auth();
       this.db = firebase.firestore();
@@ -37,34 +46,6 @@ class FirestoreSync {
       console.error('Firebase init failed:', error);
       throw error;
     }
-  }
-
-  // 动态加载 Firebase SDK
-  loadFirebaseSDK() {
-    return new Promise((resolve, reject) => {
-      if (window.firebase) {
-        resolve();
-        return;
-      }
-
-      const script1 = document.createElement('script');
-      script1.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
-      script1.onload = () => {
-        const script2 = document.createElement('script');
-        script2.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
-        script2.onload = () => {
-          const script3 = document.createElement('script');
-          script3.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js';
-          script3.onload = resolve;
-          script3.onerror = reject;
-          document.head.appendChild(script3);
-        };
-        script2.onerror = reject;
-        document.head.appendChild(script2);
-      };
-      script1.onerror = reject;
-      document.head.appendChild(script1);
-    });
   }
 
   // 注册

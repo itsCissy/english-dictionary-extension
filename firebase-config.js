@@ -14,14 +14,15 @@
 //    - 项目设置 → 网页应用 → 注册应用 → 复制配置
 // 6. 替换下面的 firebaseConfig 对象
 
-// Firebase 配置（需要替换为你的实际配置）
+// Firebase 配置（English Dictionary 项目）
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCRetZg-6oj5HAXzmZ5_ZMZTnHDs7p8PSo",
+  authDomain: "english-dictionary-aff74.firebaseapp.com",
+  projectId: "english-dictionary-aff74",
+  storageBucket: "english-dictionary-aff74.firebasestorage.app",
+  messagingSenderId: "306068538646",
+  appId: "1:306068538646:web:6d729471605a9bdb7cfc37",
+  measurementId: "G-88GT7462MJ"
 };
 
 // ⚠️ 开发模式：如果未配置 Firebase，使用本地存储

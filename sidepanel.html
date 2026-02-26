@@ -5,23 +5,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>English Dictionary - 生词本</title>
   <link rel="stylesheet" href="sidepanel.css">
+  <!-- Firebase 配置 -->
+  <script src="firebase-config.js"></script>
 </head>
 <body>
+  <!-- 登录视图 -->
+  <div id="loginView" class="view" style="display: none;">
+    <div class="login-container">
+      <div class="login-header">
+        <h1>🔗 云端同步</h1>
+        <p class="login-subtitle">登录后在多设备间同步生词本</p>
+      </div>
+
+      <!-- 登录表单 -->
+      <form id="loginForm" class="auth-form">
+        <div class="form-group">
+          <label for="loginEmail">邮箱</label>
+          <input type="email" id="loginEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">密码</label>
+          <input type="password" id="loginPassword" placeholder="至少6位" required>
+        </div>
+        <div class="form-error" id="loginError"></div>
+        <button type="submit" class="btn btn-primary btn-block">登录</button>
+      </form>
+
+      <!-- 注册表单 -->
+      <form id="registerForm" class="auth-form" style="display: none;">
+        <div class="form-group">
+          <label for="registerEmail">邮箱</label>
+          <input type="email" id="registerEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">密码</label>
+          <input type="password" id="registerPassword" placeholder="至少6位" required>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">确认密码</label>
+          <input type="password" id="confirmPassword" placeholder="再次输入密码" required>
+        </div>
+        <div class="form-error" id="registerError"></div>
+        <button type="submit" class="btn btn-primary btn-block">注册</button>
+      </form>
+
+      <div class="auth-switch">
+        <span id="authSwitchText">还没有账号？</span>
+        <button id="authSwitchBtn" class="btn-link">注册</button>
+      </div>
+
+      <div class="auth-footer">
+        <p class="auth-info">💡 数据存储在 Firebase 云端</p>
+        <a href="#" id="learnMoreLink" class="btn-link">了解更多</a>
+      </div>
+    </div>
+  </div>
+
   <!-- 主视图 -->
   <div id="mainView" class="view">
     <div class="container">
       <header class="header">
-        <h1>📚 生词本</h1>
-        <div class="stats" id="mainStats">
-          <div class="stat-item">
-            <span class="stat-value" id="totalCount">0</span>
-            <span class="stat-label">已保存</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-value" id="masteredCount">0</span>
-            <span class="stat-label">已掌握</span>
+        <div class="header-left">
+          <h1>📚 生词本</h1>
+          <!-- 云端同步状态 -->
+          <div class="sync-status" id="syncStatus">
+            <span class="sync-icon" id="syncIcon">☁️</span>
+            <span class="sync-text" id="syncText">未登录</span>
           </div>
         </div>
+        <div class="header-right">
+          <button class="icon-btn" id="syncBtn" title="立即同步" style="display: none;">🔄</button>
+          <button class="icon-btn" id="accountBtn" title="账户">👤</button>
+        </div>
+      </header>
+
+      <!-- 同步提示 -->
+      <div class="sync-banner" id="syncBanner" style="display: none;">
+        <span class="sync-banner-icon">🔄</span>
+        <span class="sync-banner-text">正在同步...</span>
+      </div>
+
+      <div class="stats" id="mainStats">
+        <div class="stat-item">
+          <span class="stat-value" id="totalCount">0</span>
+          <span class="stat-label">已保存</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="masteredCount">0</span>
+          <span class="stat-label">已掌握</span>
+        </div>
+      </div>
       </header>
 
       <!-- 视图切换 -->
@@ -135,6 +208,23 @@
     </div>
   </div>
 
+  <!-- 账户弹窗 -->
+  <div id="accountModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>账户</h2>
+        <button class="modal-close" id="closeAccountModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="account-info">
+          <p><strong>邮箱：</strong><span id="accountEmail">-</span></p>
+          <p><strong>状态：</strong><span id="accountStatus">已登录</span></p>
+        </div>
+        <button class="btn btn-secondary btn-block" id="logoutBtn">退出登录</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 单词详情弹窗 -->
   <div id="wordDetailModal" class="modal">
     <div class="modal-content">
@@ -158,6 +248,8 @@
     </div>
   </div>
 
+  <!-- Firebase SDK 和同步模块 -->
+  <script src="firestore-sync.js"></script>
   <script src="sidepanel.js"></script>
 </body>
 </html>

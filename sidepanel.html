@@ -246,10 +246,10 @@
     </div>
   </div>
 
-  <!-- Firebase SDK (compat version for browser extensions) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase SDK (本地文件，避免 CSP 问题) -->
+  <script src="lib/firebase/firebase-app-compat.js"></script>
+  <script src="lib/firebase/firebase-auth-compat.js"></script>
+  <script src="lib/firebase/firebase-firestore-compat.js"></script>
 
   <!-- Firebase 配置 -->
   <script src="firebase-config.js"></script>
